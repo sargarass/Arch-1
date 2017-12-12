@@ -4,19 +4,15 @@
 работы. Дополнительные цели: получение навыков разработки программ в вещественных
 числах, умение учитывать вычислительные погрешности, навыки составления отчётов." (с) Методичка.pdf
 
-# Задание:
-Разработать подпрограмму численного интегрирования, реализующую метод трапеций;
-Дополнительные указания:
+# Task
+You need to create a program of numerical integration which use trapezoidal rule 
+Beginning rules:
+a) use type double
+b) at the first steps you have to used cos x as integrable function, where x ∊ [ -π , π ];
+c) In the process of performing the task, function and limits of integration have to be changed..
+d) for more information please read [методичка.pdf](https://github.com/sargarass/Arch-1/blob/master/%D0%BC%D0%B5%D1%82%D0%BE%D0%B4%D0%B8%D1%87%D0%BA%D0%B0.pdf) (in russian). 
 
-а) использовать тип double;
-
-б) на первых шагах использовать в качестве подынтегральной функции cos x, где x ∊ [ -π , π ];
-
-в) в процессе выполнения задания подынтегральную функцию и/или пределы интегрирования надо менять 
-
-г) см. методичку
-
-Программу рекомендуется оформить примерно таким образом:
+It is recommended to write the program in this way:
 ```C
 
 #define _USE_MATH_DEFINES
@@ -34,7 +30,7 @@ double F( double x )
     return -cos( x );
 }
 
-/* функция численного интегрирования */
+/* function of numerical integration */
 double Integral( double Left, double Right, long N, double (*func)(double) )
 {
     double x, dx, res = 0.0;
@@ -50,30 +46,33 @@ int main()
     long n;
     double L = 0.0, R = M_PI;
     double V, V0 = F( R ) - F( L );
-    /* точное решение */
+    /* exact solution */
     setlocale( LC_ALL, "" );
-    /* использовать , или . для отделения дробной части */
-    printf("Число шагов;Относительная ошибка\n");
+    /* use , or . to seperate fractional and decimal part of real number */
+    printf("Number of steps;Relative error\n");
     for ( n = 1; n < 100; n += n/50+1) {
         V = Integral( L, R, n, f );
-        /* приближенное решение для n шагов */
+        /* approximate solution for n steps */
         printf( "%ld;=%.15G\n", n, (V-V0)/V0 );
-        /* n и относительная ошибка */
+        /* n and relative error */
     }
 }
 ```
 
-# Сборка
-Проект написан на C. Для сборки необходима утилита qmake. 
-
-В папке с проектом выполнить:
-
+# How to build
+The program is written in C. For building you need to use qmake from Qt:
+In the folder with project run following commands:
 1 qmake arch2.pro
-
 2 make
 
-# Результат
-Была разработана программа, которая учитывает все виды найденных ошибок (см. DZ_Борнев.pdf). В программе была снижена вычислительная погрешность, также устранен выход за правую границу интегрирования.
+# Solution
+It is english translated version of [DZ_Борнев.pdf](https://github.com/sargarass/Arch-1/blob/master/DZ_%D0%91%D0%BE%D1%80%D0%BD%D0%B5%D0%B2.pdf)
+
+First of all let's write naive version of numerical integration
+```C
+
+```
+
 
 Финальная реализация:
 ```C
