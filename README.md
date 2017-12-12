@@ -63,8 +63,11 @@ int main()
 
 # How to build
 The program is written in C. For building you need to use qmake from Qt:
+
 In the folder with project run following commands:
+
 1 qmake arch2.pro
+
 2 make
 
 # Solution
