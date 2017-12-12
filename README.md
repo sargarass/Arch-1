@@ -1,18 +1,18 @@
 # This project was made in 2013 year at the first year of Bauman Moscow State Technical University (Computer architecture course).
 
-# Цель работы
-"Самая сложная часть каждого этапа: формулирование требований к тесту и анализ
-полученных результатов. Собственно говоря, получение такого навыка и является целью
-работы. Дополнительные цели: получение навыков разработки программ в вещественных
-числах, умение учитывать вычислительные погрешности, навыки составления отчётов." (с) Методичка.pdf
-
 # Task
 You need to create a program of numerical integration which use trapezoidal rule 
 Beginning rules:
+
 a) use type double
+
 b) at the first steps you have to used cos x as integrable function, where x ∊ [ -π , π ];
+
 c) In the process of performing the task, function and limits of integration have to be changed..
-d) for more information please read [методичка.pdf](https://github.com/sargarass/Arch-1/blob/master/%D0%BC%D0%B5%D1%82%D0%BE%D0%B4%D0%B8%D1%87%D0%BA%D0%B0.pdf) (in russian). 
+
+d) For each changing in the code you have to formulate the requirements for the test/hypothesis and analyze the results.
+
+e) for more information please read [методичка.pdf](https://github.com/sargarass/Arch-1/blob/master/%D0%BC%D0%B5%D1%82%D0%BE%D0%B4%D0%B8%D1%87%D0%BA%D0%B0.pdf) (in russian). 
 
 It is recommended to write the program in this way:
 ```C
@@ -227,7 +227,8 @@ As we can see in tests from last table rows which have differ program's result f
 x = x + dx
 ```
 If every operation of summation is performing with some error <img src="http://latex.codecogs.com/gif.latex?\epsilon" border="0"/> then:
-<img src="http://latex.codecogs.com/gif.latex?\sigma=((((x+dx)(1\pm\epsilon)+dx)(1\pm\epsilon)+dx)\dots)+dx)(1\pm\epsilon)" border="0"/>
+<img src="http://latex.codecogs.com/gif.latex?\sigma=((((x+dx)(1\pm\epsilon)+dx)(1\pm\epsilon)+dx)\dots)+dx)(1\pm\epsilon)" border="0"/> (1)
+
 where <img src="http://latex.codecogs.com/gif.latex?\sigma" border="0"/> - is sum computed with some error.
 Subtracting from this formula the exact value of the sum for the nth step <img src="http://latex.codecogs.com/gif.latex?x+ndx" border="0"/> and neglecting terms with ε greater than the first degree we can get formula to computing sum's error for n steps:
 
@@ -293,10 +294,66 @@ The results of testing are not given here because of their obviousness.
 After the introduced changes integral at those steps on which there were "big" absolute error is considered sufficiently accurate. The serious error has been eliminated, therefore, it is **advisable to make these changes into the program**. 
 
 ## Hypothesis 2: 
-Let's consider a sum of floating point vector
-S(n)
+Let's consider a sum of floating point set
 
-Финальная реализация:
+<img src="http://latex.codecogs.com/gif.latex?f(x)=S(n)=x_0+\dots+x_n" border="0"/>
+
+Using formula (1)  and neglecting terms with ε greater than the first degree:
+
+<img src="http://latex.codecogs.com/gif.latex?f(x)=S(n)\approx{x_0+n\epsilon{x_0}+x_1+n\epsilon{x_1}+(n-1)x_2\epsilon+x_2+...+x_n+x_n\epsilon}=\sum_{i=0}^{n}x_i+n\epsilon{x_0}+\sum_{i=1}^{n}(n-i+1)x_i\epsilon" border="0"/>
+
+It can be seen that the coefficients of the first x's, for example, <img src="http://latex.codecogs.com/gif.latex?f(x)=x_0" border="0"/>, <img src="http://latex.codecogs.com/gif.latex?f(x)=x_1" border="0"/> - εn, while the coefficient of <img src="http://latex.codecogs.com/gif.latex?f(x)=x_n" border="0"/> - ε. Hence we can make the assumption that with a naive summation it is advantageous to compute sum of numbers, starting from small in modulus, so that the relative summation error is the smallest. Also it is better to compute sum of positive numbers separately from negative ones.
+
+### Test
+Let's write the program for summing the set of random numbers that will use different summation algorithms:
+
+1. The naive algorithm
+
+2. Summation of the sorted array in descending order
+
+3. Summation of the sorted array in ascending order
+
+4. To compute sum of the numbers, we will use the heap: at each operation we take two min elements of heap, compute their sum, push sum back to heap. Therefore at every operation we will minimize the error of summation.
+
+Result of testing on two sets of random numbers with size 741777 (the naive long double summation was taken as exact solution):
+
+| |Result |Absolute error | Result (second) | Absolute error (second) |
+| --- | --- | --- | --- | --- |
+|Naive|-5.176118010672767e+11|0.000122338533401489258|1.343202116610425e+06|2.97998212772654369e-08|
+|Sorted(less)|-5.176118010672769e+11|6.07669353485107422e-05|1.343202116610455e+06|-2.50111042987555265e-12|
+|Sorted(more)|-5.176118010672816e+11|0.00482150912284851074|1.343202116610420e+06|3.44564341503428295e-08|
+|Heapsum|-5.176118010672768e+11|2.68220901489257812e-07|1.343202116610455e+06|-2.50111042987555265e-12|
+|Long double naive|-5.176118010672767947e+11| | 1.343202116610454859e+06| |
+
+Almost in all tests, there are near equality results given by the heap sum and sorting in ascending order, but on some it is noticed the advantage of heap sum. Also, in almost all tests, summation from larger to smaller was worse than naive.
+
+**Conclusion**:
+Hypothesis 2 can be confirmed: the summation result really improves if we first summarize the small numbers. For further analysis, we assume that our sum is considered fairly accurate. To do this, change the type of the variable sum to long double. Also, add the -m128bit-long-double compilation flag to get more accurate calculations when using long double.
+
+## Hypothesis 3: lost of accuracy arises from the incorrect calculation of the areas of elementary trapezoids.
+Note: here needs test to show this, but it will be shown after on graphic as a result. 
+
+Since each add operation is performed with some error, then from the hypothesis 1, 2 we can conclude that *dx* at the moment of step *i*  is not equal to i * *dx* (initial *dx*).
+
+In our implementation we calculate trapezium square:
+
+<img src="http://latex.codecogs.com/gif.latex?S_{\phi}(i)=0.5*(f(x_i+x_{i_\delta}+f(x_{i+1}+x_{{i+1}_\delta}))*dx" border="0"/>,
+where <img src="http://latex.codecogs.com/gif.latex?x_{i_\delta},x_{{i+1}_\delta}" border="0"/> are some errors.
+
+When the exect solution is:
+<img src="http://latex.codecogs.com/gif.latex?S(i)=0.5*(f(x_i)+f(x_{i+1}))*dx" border="0"/>
+
+Let's calculate the absolute error along the Y axis:
+
+<img src="http://latex.codecogs.com/gif.latex?y_\Delta=\sum_{i=0}^{N-1}(S(i)-S_{\phi}(i))" border="0"/>
+
+Since the trapezoid method approximates the function on the each interval to a straight line, we simplify the formula:
+
+<img src="http://latex.codecogs.com/gif.latex?y_\Delta=\sum_{i=0}^{N-1}(0.5*dx(k_{i}x_i-k_i(x_i+x_{i_\delta})+k_{i}x_{i+1}-k_{i}(x_{i+1}+x_{{i+1}_\delta}))=-0.5dx{\sum_{i=0}^{N-1}k_i*(x_{i_\delta}+x_{{i+1}_\delta})" border="0"/>
+
+As we can see error along the Y axis linearly depends on the error along the X axis and the first derivative. If we compensate errors along X, the effect of the first derivative of Y is also compensate. Therefore, we will consider the height (*dx*) not as a constant, but *x2 - x*, where *x* is the value of *dx* at the i-th step, and *x2* is the value of *dx* on the (i + 1)-th. 
+
+# Result
 ```C
 typedef double T;
 typedef double LT;
@@ -308,8 +365,6 @@ T f(T x)
 #define MAX(a,b) (((a) > (b))? (a) : (b))
 T integrate(T left, T right, ulong steps, T* real_right)
 {
-    if (steps >= ((long double)right - (long double)left) * ((ulong)(1) << (ulong)(53)) * MAX(fabsl((long double)left),fabsl((long double)right)))
-     return NAN;
     LT sum = 0;
     T x2 = left, x = left;
     T dx  = (right  - left) / steps;
