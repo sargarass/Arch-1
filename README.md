@@ -16,7 +16,7 @@ e) for more information please read [методичка.pdf](https://github.com/
 
 It is recommended to write the program in this way:
 ```C
-
+// Listing 1
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <locale.h>
@@ -72,6 +72,7 @@ It is english translated version of [DZ_Борнев.pdf](https://github.com/sar
 
 First of all let's write naive version of numerical integration
 ```C
+// Listing 2
 #define _USE_MATH_DEFINES
 #define _GNU_SOURCE
 #include <string.h>
@@ -172,6 +173,7 @@ Since in the "naive implementation" we used "while loop" and all floating points
 
 Change our program in the following way for getting *right* bound of interval after integration:
 ```C
+// Listing 3
 double integrate(double left, double right, ulong steps, double* real_right)
 {
     double sum = 0;
@@ -264,6 +266,7 @@ We perform modification of program:
 Using this modification we also avoid error if function was not defined beyond integration interval
 
 ```C
+// Listing 4
 double integrate(double left, double right, ulong steps, double* real_right)
 {
  	 double sum   = 0;
@@ -353,8 +356,9 @@ Since the trapezoid method approximates the function on the each interval to a s
 
 As we can see error along the Y axis linearly depends on the error along the X axis and the first derivative. If we compensate errors along X, the effect of the first derivative of Y is also compensate. Therefore, we will consider the height (*dx*) not as a constant, but *x2 - x*, where *x* is the value of *dx* at the i-th step, and *x2* is the value of *dx* on the (i + 1)-th. 
 
-# Result
+## Result with last suggestion:
 ```C
+// Listing 5
 typedef double T;
 typedef double LT;
 T f(T x)
@@ -375,6 +379,14 @@ T integrate(T left, T right, ulong steps, T* real_right)
     }
     sum += (LT)(((f(right) + f(x)) * (right - x) * 0.5));
     (*real_right) = x + (right - x);
-    return  sum;
+    return  sum;
 }
 ```
+
+Let's integrate the function y = cos (x) on the interval [100π; 101π] by two implementations (from Listing 4 and Listing 5). 
+The absolute error of the method is greater than <img src="http://latex.codecogs.com/gif.latex?8*10^-5" border="0"/>
+for the entire integration interval.  We use the float type for X-s, since problems for float will be visible much earlier than for double. For summation, we will also use long double to exclude as much as possible the accumulation of the error in the summation over Y. We will construct a schedule based on the results of the absolute error of both realizations:
+![](https://github.com/sargarass/Arch-1/blob/master/result.png)
+
+
+As can be seen from the last test, the implementation in listing 5 does not "overflow" relative to the line y = 2 * 10^-5, while the implementation in Listing 4 shows much worse results. Since in the implementation from Listing 5 all the errors investigated in the previous hypotheses were taken into account, it is advisable to use it.
