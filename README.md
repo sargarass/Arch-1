@@ -73,8 +73,8 @@ In the folder with project run following commands:
 
 2 make
 
-# Solution
-It is english translated version of [DZ_Борнев.pdf](https://github.com/sargarass/Arch-1/blob/master/DZ_%D0%91%D0%BE%D1%80%D0%BD%D0%B5%D0%B2.pdf)
+# Solution (english translated version of [DZ_Борнев.pdf](https://github.com/sargarass/Arch-1/blob/master/DZ_%D0%91%D0%BE%D1%80%D0%BD%D0%B5%D0%B2.pdf))
+
 
 First of all let's write naive version of numerical integration
 ```C
