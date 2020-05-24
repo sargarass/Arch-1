@@ -1,7 +1,5 @@
 # Numerical integration trapezoidal rule
 
-This project was made in 2013 year at the first year of Bauman Moscow State Technical University (Computer architecture course).
-
 ## Task
 
 You need to create a program of numerical integration which use trapezoidal rule 
